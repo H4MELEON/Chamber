@@ -47,15 +47,16 @@ let ProtoCell = {
         this.elem.style.top = this.point.y + 'px';
 
         // Just for fun
-        if (Math.random() < 0.5) {this.teamColor.r += 15;}
-        else {this.teamColor.r -= 15;}
-        if (Math.random() < 0.5) {this.teamColor.g += 15;}
-        else {this.teamColor.g -= 15;}
-        if (Math.random() < 0.5) {this.teamColor.b += 15;}
-        else {this.teamColor.b -= 15;}
+        if ((Math.random() < 0.5 && !(this.teamColor.r > 250)) || (this.teamColor.r < 5)) {this.teamColor.r += 20;}
+        else {this.teamColor.r -= 20;}
+        if ((Math.random() < 0.5 && !(this.teamColor.g > 250)) || (this.teamColor.g < 5)) {this.teamColor.g += 20;}
+        else {this.teamColor.g -= 20;}
+        if ((Math.random() < 0.5 && !(this.teamColor.b > 250)) || (this.teamColor.b < 5)) {this.teamColor.b += 20;}
+        else {this.teamColor.b -= 20;}
         this.teamColor.getNewHEX();
         this.teamColor.getNewRGB();
         this.elem.style.backgroundColor = '#' + this.teamColor.hex;
+        console.log(this.teamColor.hex);
     }
 };
 
