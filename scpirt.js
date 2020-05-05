@@ -8,15 +8,29 @@ let ProtoColor = {
     r: 0,
     g: 0,
     b: 0,
+
+    getNewHEX: function () {
+        let r = this.r.toString(16).padStart(2, '0'),
+            g = this.g.toString(16).padStart(2, '0'),
+            b = this.b.toString(16).padStart(2, '0');
+        this.hex = r+g+b;
+    },
+
+    getNewRGB: function() {
+        let color = +(parseInt(this.hex, 16));
+        this.r = Math.floor(color / 0x10000);
+        this.g = Math.floor(color % 0x10000 / 0x100);
+        this.b = Math.floor(color % 0x100);
+    }
 };
 
 let ProtoCell = {
     elem: 0,
-    teamColor: "#000000",
+    teamColor: Object.create(null),
     sz: 0,
     parentRect: 0,
-    point: Object.create(ProtoPoint),
-    speed: Object.create(ProtoPoint),
+    point: Object.create(null),
+    speed: Object.create(null),
 
     move: function () {
         this.point.x += this.speed.x;
@@ -31,6 +45,17 @@ let ProtoCell = {
         }
         this.elem.style.left = this.point.x + 'px';
         this.elem.style.top = this.point.y + 'px';
+
+        // Just for fun
+        if (Math.random() < 0.5) {this.teamColor.r += 15;}
+        else {this.teamColor.r -= 15;}
+        if (Math.random() < 0.5) {this.teamColor.g += 15;}
+        else {this.teamColor.g -= 15;}
+        if (Math.random() < 0.5) {this.teamColor.b += 15;}
+        else {this.teamColor.b -= 15;}
+        this.teamColor.getNewHEX();
+        this.teamColor.getNewRGB();
+        this.elem.style.backgroundColor = '#' + this.teamColor.hex;
     }
 };
 
@@ -55,7 +80,9 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].elem = document.createElement('div');
             this.cells[n].elem.classList.add('point');
             box.appendChild(this.cells[n].elem);
-            this.cells[n].teamColor = color;
+            this.cells[n].teamColor = Object.create(ProtoColor);
+            this.cells[n].teamColor.hex = color;
+            this.cells[n].teamColor.getNewRGB();
             this.cells[n].sz = this.cells[n].elem.getBoundingClientRect().width;
             this.cells[n].parentRect = boxRect;
             this.cells[n].point = Object.create(ProtoPoint);
@@ -68,7 +95,7 @@ window.addEventListener('DOMContentLoaded', () => {
             if (Math.random() < 0.5) { this.cells[n].speed.y = -this.cells[n].speed.y; }
             this.cells[n].elem.style.left = this.cells[n].point.x + 'px';
             this.cells[n].elem.style.top = this.cells[n].point.y + 'px';
-            this.cells[n].elem.style.backgroundColor = this.cells[n].teamColor;
+            this.cells[n].elem.style.backgroundColor = '#' + this.cells[n].teamColor.hex;
         },
 
         addFixedPoint: function (x, y, sx, sy) {
@@ -97,8 +124,6 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-
-    console.log(document);
 
     let mainTimer, tact = 40;
     btns.play.addEventListener('click', () => {
