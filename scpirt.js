@@ -21,6 +21,16 @@ let ProtoColor = {
         this.r = Math.floor(color / 0x10000);
         this.g = Math.floor(color % 0x10000 / 0x100);
         this.b = Math.floor(color % 0x100);
+    },
+
+    changeColorsByRGB: function(r,g,b) {
+        if ((Math.random() < 0.5 && !(this.teamColor.r > 255-r)) || (this.teamColor.r < r)) {this.teamColor.r += r;}
+        else {this.teamColor.r -= r;}
+        if ((Math.random() < 0.5 && !(this.teamColor.g > 255-g)) || (this.teamColor.g < g)) {this.teamColor.g += g;}
+        else {this.teamColor.g -= g;}
+        if ((Math.random() < 0.5 && !(this.teamColor.b > 255-b)) || (this.teamColor.b < b)) {this.teamColor.b += b;}
+        else {this.teamColor.b -= b;}
+        this.teamColor.getNewHEX();
     }
 };
 
@@ -28,8 +38,10 @@ let ProtoCell = {
     elem: 0,
     teamColor: Object.create(null),
     sz: 0,
+    rangeRadius: 0,
     parentRect: 0,
     point: Object.create(null),
+    cPoint: Object.create(null),
     speed: Object.create(null),
 
     move: function () {
@@ -45,18 +57,18 @@ let ProtoCell = {
         }
         this.elem.style.left = this.point.x + 'px';
         this.elem.style.top = this.point.y + 'px';
+        this.cPoint.y = this.point.y + 5;
+        this.cPoint.x = this.point.x + 5;
+    },
 
-        // Just for fun
-        if ((Math.random() < 0.5 && !(this.teamColor.r > 250)) || (this.teamColor.r < 5)) {this.teamColor.r += 20;}
-        else {this.teamColor.r -= 20;}
-        if ((Math.random() < 0.5 && !(this.teamColor.g > 250)) || (this.teamColor.g < 5)) {this.teamColor.g += 20;}
-        else {this.teamColor.g -= 20;}
-        if ((Math.random() < 0.5 && !(this.teamColor.b > 250)) || (this.teamColor.b < 5)) {this.teamColor.b += 20;}
-        else {this.teamColor.b -= 20;}
-        this.teamColor.getNewHEX();
-        this.teamColor.getNewRGB();
-        this.elem.style.backgroundColor = '#' + this.teamColor.hex;
-        console.log(this.teamColor.hex);
+    recolor: function() { 
+        this.elem.style.backgroundColor = '#' + this.teamColor.hex; 
+    },
+
+    isInRadius: function(p) {
+        let x = p.x - this.point.x, y = p.y - this.point.y;
+        if (x*x + y*y <= this.rangeRadius*this.rangeRadius) { return true; }
+        else { return false; }
     }
 };
 
@@ -75,7 +87,7 @@ window.addEventListener('DOMContentLoaded', () => {
         cells: [],
         sz: 0,
 
-        addPoint: function (color = "#FF0000") {
+        addPoint: function (color = "FF0000") {
             let n = this.sz++;
             this.cells.push(Object.create(ProtoCell));
             this.cells[n].elem = document.createElement('div');
@@ -85,10 +97,14 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].teamColor.hex = color;
             this.cells[n].teamColor.getNewRGB();
             this.cells[n].sz = this.cells[n].elem.getBoundingClientRect().width;
+            this.cells[n].rangeRadius = 10;
             this.cells[n].parentRect = boxRect;
             this.cells[n].point = Object.create(ProtoPoint);
             this.cells[n].point.x = +(Math.random() * (boxRect.width - this.cells[0].sz)).toFixed(0);
             this.cells[n].point.y = +(Math.random() * (boxRect.height - this.cells[0].sz)).toFixed(0);
+            this.cells[n].cPoint = Object.create(ProtoPoint);
+            this.cells[n].cPoint.x = this.cells[n].point.x + 5;
+            this.cells[n].cPoint.y = this.cells[n].point.y + 5;
             this.cells[n].speed = Object.create(ProtoPoint);
             this.cells[n].speed.x = +((Math.random() * 10) % 5 + 5).toFixed(0);
             this.cells[n].speed.y = +((Math.random() * 10) % 5 + 5).toFixed(0);
@@ -99,29 +115,46 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].elem.style.backgroundColor = '#' + this.cells[n].teamColor.hex;
         },
 
-        addFixedPoint: function (x, y, sx, sy) {
+        addFixedPoint: function (x, y, sx, sy, color = "FF0000") {
             let n = this.sz++;
             this.cells.push(Object.create(ProtoCell));
             this.cells[n].elem = document.createElement('div');
             this.cells[n].elem.classList.add('point');
             box.appendChild(this.cells[n].elem);
-            this.cells[n].teamColor = "#FF0000";
+            this.cells[n].teamColor = Object.create(ProtoColor);
+            this.cells[n].teamColor.hex = color;
+            this.cells[n].teamColor.getNewRGB();
             this.cells[n].sz = this.cells[n].elem.getBoundingClientRect().width;
+            this.cells[n].rangeRadius = 10;
             this.cells[n].parentRect = boxRect;
             this.cells[n].point = Object.create(ProtoPoint);
             this.cells[n].point.x = x;
             this.cells[n].point.y = y;
+            this.cells[n].cPoint = Object.create(ProtoPoint);
+            this.cells[n].cPoint.x = x + 5;
+            this.cells[n].cPoint.y = y + 5;
             this.cells[n].speed = Object.create(ProtoPoint);
             this.cells[n].speed.x = sx;
             this.cells[n].speed.y = sy;
             this.cells[n].elem.style.left = this.cells[n].point.x + 'px';
             this.cells[n].elem.style.top = this.cells[n].point.y + 'px';
-            this.cells[n].elem.style.backgroundColor = this.cells[n].teamColor;
+            this.cells[n].elem.style.backgroundColor = '#' + this.cells[n].teamColor.hex;
+        },
+
+        ОПТИМИИЗИРУЙ ЧЕРЕЗ МАТРИЦУ!
+        checkContacts: function(num) {
+            for (let i = 0; i < this.cells.length; ++i) {
+                if (num == i) { continue; }
+                if (this.cells[num].isInRadius(this.cells[i].point)) {
+                    console.log("BIP");
+                }
+            }
         },
 
         moving: function () {
-            for (let c of this.cells) {
-                c.move();
+            for (let i = 0; i < this.cells.length; ++i) {
+                this.cells[i].move();
+                this.checkContacts(i);
             }
         }
     };
