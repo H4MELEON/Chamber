@@ -79,7 +79,13 @@ window.addEventListener('DOMContentLoaded', () => {
         play: document.getElementById('play'),
         pause: document.getElementById('pause'),
         switch: document.getElementById('switch'),
-        add: document.getElementById('add'),
+        add: {
+            btn: document.getElementById('add'),
+            context: document.getElementsByClassName('context_window')[0],
+            bg: document.getElementById('background'),
+            submit: document.getElementById('submit'),
+            close: document.getElementById('close')
+        },
     };
 
 
@@ -141,7 +147,7 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].elem.style.backgroundColor = '#' + this.cells[n].teamColor.hex;
         },
 
-        ОПТИМИИЗИРУЙ ЧЕРЕЗ МАТРИЦУ!
+        // ОПТИМИИЗИРУЙ ЧЕРЕЗ МАТРИЦУ!
         checkContacts: function(num) {
             for (let i = 0; i < this.cells.length; ++i) {
                 if (num == i) { continue; }
@@ -160,45 +166,37 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     let mainTimer, tact = 40;
-    btns.play.addEventListener('click', () => {
-        mainTimer = setInterval(() => { CellsObject.moving(); }, tact);
-    });
-    btns.pause.addEventListener('click', () => {
-        clearInterval(mainTimer);
-    });
     btns.switch.addEventListener('click', (e) => {
-        if (e.target.classList.contains('green_btn')) {
-            e.target.classList.remove('green_btn');
-            e.target.classList.add('red_btn');
-            clearInterval(mainTimer);
-        } else {
+        if (e.target.classList.contains('red_btn')) {
+            e.target.textContent = 'Пуск';
             e.target.classList.remove('red_btn');
             e.target.classList.add('green_btn');
             mainTimer = setInterval(() => { CellsObject.moving(); }, tact);
+        } else {
+            e.target.textContent = 'Стоп';
+            e.target.classList.remove('green_btn');
+            e.target.classList.add('red_btn');
+            clearInterval(mainTimer);
         }
     });
-    btns.add.addEventListener('click', () => {
-        let context = document.getElementsByClassName('context_window')[0],
-            bg = document.getElementById('background'),
-            submit = document.getElementById('submit'),
-            close = document.getElementById('close');
-        context.classList.add('show');
-        bg.style.zIndex = 0;
-        bg.style.backgroundColor = 'rgba(0,0,0,0.5)';
-        bg.addEventListener('click', () => {
-            context.classList.remove('show');
-            bg.style.zIndex = -1;
-            bg.style.backgroundColor = 'rgba(0,0,0,0)';
-        });
-        close.addEventListener('click', () => {
-            context.classList.remove('show');
-            bg.style.zIndex = -1;
-            bg.style.backgroundColor = 'rgba(0,0,0,0)';
-        });
-        submit.addEventListener('click', () => {
-            let count = +document.getElementById('count').value,
-                color = document.getElementById('color').value;
-            for (let i = 0; i < count; ++i) { CellsObject.addPoint(color); }
-        });
+    btns.add.btn.addEventListener('click', () => {
+        btns.add.context.classList.add('show');
+        btns.add.bg.style.zIndex = 0;
+        btns.add.bg.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    });
+    btns.add.bg.addEventListener('click', () => {
+        btns.add.context.classList.remove('show');
+        btns.add.bg.style.zIndex = -1;
+        btns.add.bg.style.backgroundColor = 'rgba(0,0,0,0)';
+    });
+    btns.add.close.addEventListener('click', () => {
+        btns.add.context.classList.remove('show');
+        btns.add.bg.style.zIndex = -1;
+        btns.add.bg.style.backgroundColor = 'rgba(0,0,0,0)';
+    });
+    btns.add.submit.addEventListener('click', () => {
+        let count = +document.getElementById('count').value,
+            color = document.getElementById('color').value;
+        for (let i = 0; i < count; ++i) { CellsObject.addPoint(color); }
     });
 });
