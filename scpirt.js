@@ -72,7 +72,7 @@ let ProtoCell = {
     }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', function() {
     let box = document.getElementsByClassName('main')[0];
     let boxRect = box.getBoundingClientRect();
     let btns = {
@@ -91,6 +91,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     let CellsObject = {
         cells: [],
+        positionsField: [],
+        contacts: 0,
         sz: 0,
 
         addPoint: function (color = "FF0000") {
@@ -103,7 +105,7 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].teamColor.hex = color;
             this.cells[n].teamColor.getNewRGB();
             this.cells[n].sz = this.cells[n].elem.getBoundingClientRect().width;
-            this.cells[n].rangeRadius = 10;
+            this.cells[n].rangeRadius = 15;
             this.cells[n].parentRect = boxRect;
             this.cells[n].point = Object.create(ProtoPoint);
             this.cells[n].point.x = +(Math.random() * (boxRect.width - this.cells[0].sz)).toFixed(0);
@@ -111,6 +113,7 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].cPoint = Object.create(ProtoPoint);
             this.cells[n].cPoint.x = this.cells[n].point.x + 5;
             this.cells[n].cPoint.y = this.cells[n].point.y + 5;
+            this.positionsField[this.cells[n].cPoint.x][this.cells[n].cPoint.y] = n;
             this.cells[n].speed = Object.create(ProtoPoint);
             this.cells[n].speed.x = +((Math.random() * 10) % 5 + 5).toFixed(0);
             this.cells[n].speed.y = +((Math.random() * 10) % 5 + 5).toFixed(0);
@@ -131,7 +134,7 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].teamColor.hex = color;
             this.cells[n].teamColor.getNewRGB();
             this.cells[n].sz = this.cells[n].elem.getBoundingClientRect().width;
-            this.cells[n].rangeRadius = 10;
+            this.cells[n].rangeRadius = 15;
             this.cells[n].parentRect = boxRect;
             this.cells[n].point = Object.create(ProtoPoint);
             this.cells[n].point.x = x;
@@ -139,6 +142,7 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].cPoint = Object.create(ProtoPoint);
             this.cells[n].cPoint.x = x + 5;
             this.cells[n].cPoint.y = y + 5;
+            this.positionsField[this.cells[n].cPoint.x][this.cells[n].cPoint.y] = n;
             this.cells[n].speed = Object.create(ProtoPoint);
             this.cells[n].speed.x = sx;
             this.cells[n].speed.y = sy;
@@ -147,38 +151,69 @@ window.addEventListener('DOMContentLoaded', () => {
             this.cells[n].elem.style.backgroundColor = '#' + this.cells[n].teamColor.hex;
         },
 
-        // ОПТИМИИЗИРУЙ ЧЕРЕЗ МАТРИЦУ!
-        checkContacts: function(num) {
+        checkContactsByOjbects: function(num) {
             for (let i = 0; i < this.cells.length; ++i) {
                 if (num == i) { continue; }
-                if (this.cells[num].isInRadius(this.cells[i].point)) {
-                    console.log("BIP");
+                if (this.cells[num].isInRadius(this.cells[i].point)) {   
+                    ++this.contacts;
+                    // console.log(num+" contact with "+i);
+                    // console.log("BIP");
+                }
+            }
+        },
+
+        checkContactsByField: function(num) {
+            let r = this.cells[num].rangeRadius;
+            for (let x = -r; x <= r; ++x) {                
+                for (let y = -r; y <= r; ++y) {
+                    if (x*x + y*y <= r*r) {
+                        let fx = this.cells[num].cPoint.x + x,
+                            fy = this.cells[num].cPoint.y + y;
+                        if (fx < 0 || fx >= 800 || fy < 0 || fy >= 800) { continue; }
+                        if (this.positionsField[fx][fy] != -1 && this.positionsField[fx][fy] != num) {
+                            let contactIndex = this.positionsField[fx][fy];
+                            ++this.contacts;
+                            // console.log(num+" contact with "+contactIndex);
+                            // console.log("BIP");
+                        }
+                    }
                 }
             }
         },
 
         moving: function () {
             for (let i = 0; i < this.cells.length; ++i) {
+                this.positionsField[this.cells[i].cPoint.x][this.cells[i].cPoint.y] = -1;
                 this.cells[i].move();
-                this.checkContacts(i);
+                this.positionsField[this.cells[i].cPoint.x][this.cells[i].cPoint.y] = i;
+                this.checkContactsByField(i);
+                // this.checkContactsByOjbects(i);
             }
         }
     };
 
-    let mainTimer, tact = 40;
+    let mainTimer, tact = 50;
+    for (let i = 0; i < 800; ++i) {
+        CellsObject.positionsField[i] = new Array(800);
+        for (let j = 0; j < 800; ++j) {
+            CellsObject.positionsField[i][j] = -1;
+        }
+    }
+
     btns.switch.addEventListener('click', (e) => {
-        if (e.target.classList.contains('red_btn')) {
-            e.target.textContent = 'Пуск';
-            e.target.classList.remove('red_btn');
-            e.target.classList.add('green_btn');
-            mainTimer = setInterval(() => { CellsObject.moving(); }, tact);
-        } else {
+        if (e.target.classList.contains('green_btn')) {
             e.target.textContent = 'Стоп';
             e.target.classList.remove('green_btn');
             e.target.classList.add('red_btn');
+            mainTimer = setInterval(() => { CellsObject.moving(); }, tact);
+        } else {
+            e.target.textContent = 'Пуск';
+            e.target.classList.remove('red_btn');
+            e.target.classList.add('green_btn');
             clearInterval(mainTimer);
         }
     });
+
     btns.add.btn.addEventListener('click', () => {
         btns.add.context.classList.add('show');
         btns.add.bg.style.zIndex = 0;
@@ -199,4 +234,5 @@ window.addEventListener('DOMContentLoaded', () => {
             color = document.getElementById('color').value;
         for (let i = 0; i < count; ++i) { CellsObject.addPoint(color); }
     });
+
 });
