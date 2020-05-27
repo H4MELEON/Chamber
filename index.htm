@@ -5,137 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
     <title>Испытательный полигон</title>
-    <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: arial;
-            font-weight: 700;
-            text-align: center;
-            height: 100%;
-        }
-
-        #background {
-            z-index: -1;
-            position: fixed;
-            top: 0;
-            transition: 0.5s;
-            width: 100%;
-            height: 100%;
-        }
-
-        .add {
-            border: 5px solid black;
-            border-radius: 10px;
-            display: inline-block;
-            height: 830px;
-            margin: 15px;
-            width: 15%;
-            box-sizing: border-box;
-            vertical-align: top;
-        }
-
-        .kostil_border {
-            margin: 15px;
-            border-radius: 20px;
-            background-color: black;
-            width: 830px;
-            display: inline-block;
-        }
-
-        .main {
-            background-color: white;
-            position: relative;
-            height: 800px;
-            margin: 15px;
-            width: 800px;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 80%;
-            padding: 15px;
-            margin: 15px;
-            border: 3px solid black;
-            border-radius: 10px;
-            font-size: 1.3rem;
-        }
-
-        .green_btn {
-            background-color: #3C3;
-        }
-
-        .green_btn:hover {
-            background-color: #3A3;
-        }
-
-        .green_btn:active {
-            background-color: #151;
-        }
-
-        .red_btn {
-            background-color: #C33;
-        }
-
-        .red_btn:hover {
-            background-color: #A33;
-        }
-
-        .red_btn:active {
-            background-color: #511;
-        }
-
-        .yellow_btn {
-            background-color: #CC3;
-        }
-
-        .yellow_btn:hover {
-            background-color: #AA3;
-        }
-
-        .yellow_btn:active {
-            background-color: #551;
-        }
-
-        .context_window {
-            z-index: 1;
-            width: 30%;
-            transition: 0.5s;
-            border: 5px solid black;
-            padding: 0 40px;
-            background-color: white;
-            border-radius: 10px;
-            position: fixed;
-            font-size: 1.5rem;
-        }
-
-        .hide {
-            left:-100%;
-        }
-
-        .show {
-            left:5%;
-        }
-
-        input {
-            display: block;
-            border: 3px solid black;
-            margin: 5px;
-            width: 100%;
-            font-size: 1.5rem;
-            padding: 10px;
-            box-sizing:border-box;
-        }
-
-        .point {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            position: absolute;
-        }
-    </style>
 </head>
 
 <body>
@@ -148,19 +19,32 @@
         <button id="close" class="red_btn">Закрыть</button>
     </div>
     <div class="add">
-        <h2>Управдение</h2>
+        <h2>Управление</h2>
         <button id="switch" class="green_btn">Пуск</button>
         <button id="add" class="yellow_btn">Добавить</button>
+        <button id="upd" class="yellow_btn">Обновить данные</button>
     </div>
 
     <div class="add">
         <h2>Информация</h2>
+        <div class="info">
+            <h3>Количество клеток</h3>
+            <div id="counts_container">
+
+            </div>
+        </div>
+        <div class="info">
+            <h3></h3>
+
+        </div>
+        <div class="info">
+            <h3></h3>
+
+        </div>
     </div>
 
     <div class="kostil_border">
-        <div class="main">
-
-        </div>
+        <div class="main"></div>
     </div>
     <div id="background"></div>
     <script src="./scpirt.js"></script>

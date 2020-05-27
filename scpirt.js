@@ -1,3 +1,5 @@
+'use strict'
+
 let ProtoPoint = {
     x: 0,
     y: 0
@@ -24,13 +26,13 @@ let ProtoColor = {
     },
 
     changeColorsByRGB: function(r,g,b) {
-        if ((Math.random() < 0.5 && !(this.teamColor.r > 255-r)) || (this.teamColor.r < r)) {this.teamColor.r += r;}
-        else {this.teamColor.r -= r;}
-        if ((Math.random() < 0.5 && !(this.teamColor.g > 255-g)) || (this.teamColor.g < g)) {this.teamColor.g += g;}
-        else {this.teamColor.g -= g;}
-        if ((Math.random() < 0.5 && !(this.teamColor.b > 255-b)) || (this.teamColor.b < b)) {this.teamColor.b += b;}
-        else {this.teamColor.b -= b;}
-        this.teamColor.getNewHEX();
+        if ((Math.random() < 0.5 && !(this.r > 255-r)) || (this.r < r)) {this.r += r;}
+        else {this.r -= r;}
+        if ((Math.random() < 0.5 && !(this.g > 255-g)) || (this.g < g)) {this.g += g;}
+        else {this.g -= g;}
+        if ((Math.random() < 0.5 && !(this.b > 255-b)) || (this.b < b)) {this.b += b;}
+        else {this.b -= b;}
+        this.getNewHEX();
     }
 };
 
@@ -59,6 +61,8 @@ let ProtoCell = {
         this.elem.style.top = this.point.y + 'px';
         this.cPoint.y = this.point.y + 5;
         this.cPoint.x = this.point.x + 5;
+        // this.teamColor.changeColorsByRGB(Math.floor(Math.random()*10), Math.floor(Math.random()*10), Math.floor(Math.random()*10));
+        // this.recolor();
     },
 
     recolor: function() { 
@@ -75,9 +79,8 @@ let ProtoCell = {
 window.addEventListener('DOMContentLoaded', function() {
     let box = document.getElementsByClassName('main')[0];
     let boxRect = box.getBoundingClientRect();
+    let infoTables = document.getElementsByClassName('info');
     let btns = {
-        play: document.getElementById('play'),
-        pause: document.getElementById('pause'),
         switch: document.getElementById('switch'),
         add: {
             btn: document.getElementById('add'),
@@ -86,12 +89,14 @@ window.addEventListener('DOMContentLoaded', function() {
             submit: document.getElementById('submit'),
             close: document.getElementById('close')
         },
+        upd: document.getElementById('upd'),
     };
 
 
     let CellsObject = {
         cells: [],
         positionsField: [],
+        colorsSet: new Set(),
         contacts: 0,
         sz: 0,
 
@@ -104,6 +109,7 @@ window.addEventListener('DOMContentLoaded', function() {
             this.cells[n].teamColor = Object.create(ProtoColor);
             this.cells[n].teamColor.hex = color;
             this.cells[n].teamColor.getNewRGB();
+            this.colorsSet.add(this.cells[n].teamColor.hex);
             this.cells[n].sz = this.cells[n].elem.getBoundingClientRect().width;
             this.cells[n].rangeRadius = 15;
             this.cells[n].parentRect = boxRect;
@@ -133,6 +139,7 @@ window.addEventListener('DOMContentLoaded', function() {
             this.cells[n].teamColor = Object.create(ProtoColor);
             this.cells[n].teamColor.hex = color;
             this.cells[n].teamColor.getNewRGB();
+            this.colorsSet.add(this.cells[n].teamColor.hex);
             this.cells[n].sz = this.cells[n].elem.getBoundingClientRect().width;
             this.cells[n].rangeRadius = 15;
             this.cells[n].parentRect = boxRect;
@@ -189,10 +196,23 @@ window.addEventListener('DOMContentLoaded', function() {
                 this.checkContactsByField(i);
                 // this.checkContactsByOjbects(i);
             }
+        },
+
+        update: function () {
+            let container = document.getElementById('counts_container');
+            container.innerHTML = '';
+            for (let color of this.colorsSet) {
+                let count = 0;
+                for (let item of this.cells) {  if (color === item.teamColor.hex) { ++count; } }
+                let countHTML = document.createElement('p');
+                countHTML.innerHTML = '<span style="color:#'+color+'">#'+color+'</span>: '+count;
+                countHTML.classList.add('count_info');
+                container.appendChild(countHTML);
+            }
         }
     };
 
-    let mainTimer, tact = 50;
+    let mainTimer, tact = 32;
     for (let i = 0; i < 800; ++i) {
         CellsObject.positionsField[i] = new Array(800);
         for (let j = 0; j < 800; ++j) {
@@ -233,6 +253,10 @@ window.addEventListener('DOMContentLoaded', function() {
         let count = +document.getElementById('count').value,
             color = document.getElementById('color').value;
         for (let i = 0; i < count; ++i) { CellsObject.addPoint(color); }
+        CellsObject.update();
     });
 
+    btns.upd.addEventListener('click', () => {
+        CellsObject.update();
+    });
 });

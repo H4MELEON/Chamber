@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@500&family=Electrolize&display=swap');
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: arial;
+    font-weight: 700;
+    text-align: center;
+    height: 100%;
+}
+
+h3 {
+    margin: 0;
+}
+
+#background {
+    z-index: -1;
+    position: fixed;
+    top: 0;
+    transition: 0.5s;
+    width: 100%;
+    height: 100%;
+}
+
+.add {
+    border: 5px solid black;
+    border-radius: 10px;
+    display: inline-block;
+    height: 830px;
+    margin: 15px;
+    width: 15%;
+    box-sizing: border-box;
+    vertical-align: top;
+}
+
+.kostil_border {
+    margin: 15px;
+    border-radius: 20px;
+    background-color: black;
+    width: 830px;
+    display: inline-block;
+}
+
+.main {
+    background-color: white;
+    position: relative;
+    height: 800px;
+    margin: 15px;
+    width: 800px;
+    box-sizing: border-box;
+}
+
+button {
+    width: 80%;
+    padding: 15px;
+    margin: 15px;
+    border: 3px solid black;
+    border-radius: 10px;
+    font-size: 1.3rem;
+}
+
+.green_btn {
+    background-color: #3C3;
+}
+
+.green_btn:hover {
+    background-color: #3A3;
+}
+
+.green_btn:active {
+    background-color: #151;
+}
+
+.red_btn {
+    background-color: #C33;
+}
+
+.red_btn:hover {
+    background-color: #A33;
+}
+
+.red_btn:active {
+    background-color: #511;
+}
+
+.yellow_btn {
+    background-color: #CC3;
+}
+
+.yellow_btn:hover {
+    background-color: #AA3;
+}
+
+.yellow_btn:active {
+    background-color: #551;
+}
+
+.context_window {
+    z-index: 1;
+    width: 30%;
+    transition: 0.5s;
+    border: 5px solid black;
+    padding: 0 40px;
+    background-color: white;
+    border-radius: 10px;
+    position: fixed;
+    font-size: 1.5rem;
+}
+
+.hide {
+    left:-100%;
+}
+
+.show {
+    left:5%;
+}
+
+input {
+    display: block;
+    border: 3px solid black;
+    margin: 5px;
+    width: 100%;
+    font-size: 1.5rem;
+    padding: 10px;
+    box-sizing:border-box;
+}
+
+.info {
+    margin: 10px;
+    padding: 10px;
+    border: 3px solid black;
+    border-radius: 5px;
+    width: calc(90%-20px);
+}
+
+.count_info {
+    text-align: left;
+    font-family: 'DM Mono';
+    font-size: 1.5rem;
+    margin: 2px;
+}
+
+.point {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    position: absolute;
+}
