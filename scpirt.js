@@ -15,23 +15,23 @@ let ProtoColor = {
         let r = this.r.toString(16).padStart(2, '0'),
             g = this.g.toString(16).padStart(2, '0'),
             b = this.b.toString(16).padStart(2, '0');
-        this.hex = r+g+b;
+        this.hex = r + g + b;
     },
 
-    getNewRGB: function() {
+    getNewRGB: function () {
         let color = +(parseInt(this.hex, 16));
         this.r = Math.floor(color / 0x10000);
         this.g = Math.floor(color % 0x10000 / 0x100);
         this.b = Math.floor(color % 0x100);
     },
 
-    changeColorsByRGB: function(r,g,b) {
-        if ((Math.random() < 0.5 && !(this.r > 255-r)) || (this.r < r)) {this.r += r;}
-        else {this.r -= r;}
-        if ((Math.random() < 0.5 && !(this.g > 255-g)) || (this.g < g)) {this.g += g;}
-        else {this.g -= g;}
-        if ((Math.random() < 0.5 && !(this.b > 255-b)) || (this.b < b)) {this.b += b;}
-        else {this.b -= b;}
+    changeColorsByRGB: function (r, g, b) {
+        if ((Math.random() < 0.5 && !(this.r > 255 - r)) || (this.r < r)) { this.r += r; }
+        else { this.r -= r; }
+        if ((Math.random() < 0.5 && !(this.g > 255 - g)) || (this.g < g)) { this.g += g; }
+        else { this.g -= g; }
+        if ((Math.random() < 0.5 && !(this.b > 255 - b)) || (this.b < b)) { this.b += b; }
+        else { this.b -= b; }
         this.getNewHEX();
     }
 };
@@ -39,6 +39,8 @@ let ProtoColor = {
 let ProtoCell = {
     elem: 0,
     teamColor: Object.create(null),
+    power: 0,
+    dead: false,
     sz: 0,
     rangeRadius: 0,
     parentRect: 0,
@@ -65,31 +67,39 @@ let ProtoCell = {
         // this.recolor();
     },
 
-    recolor: function() { 
-        this.elem.style.backgroundColor = '#' + this.teamColor.hex; 
+    recolor: function () {
+        this.elem.style.backgroundColor = '#' + this.teamColor.hex;
     },
 
-    isInRadius: function(p) {
+    isInRadius: function (p) {
         let x = p.x - this.point.x, y = p.y - this.point.y;
-        if (x*x + y*y <= this.rangeRadius*this.rangeRadius) { return true; }
+        if (x * x + y * y <= this.rangeRadius * this.rangeRadius) { return true; }
         else { return false; }
-    }
+    },
+
+    doDeath: function () { this.elem.classList.add('dead_point'); this.dead = true; }
 };
 
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', function () {
     let box = document.getElementsByClassName('main')[0];
     let boxRect = box.getBoundingClientRect();
-    let infoTables = document.getElementsByClassName('info');
     let btns = {
         switch: document.getElementById('switch'),
         add: {
             btn: document.getElementById('add'),
             context: document.getElementsByClassName('context_window')[0],
             bg: document.getElementById('background'),
-            submit: document.getElementById('submit'),
-            close: document.getElementById('close')
+            submit: document.getElementById('submit_add'),
+            close: document.getElementById('close_add'),
         },
-        upd: document.getElementById('upd'),
+        settings: {
+            btn: document.getElementById('settings'),
+            context: document.getElementsByClassName('context_window')[1],
+            bg: document.getElementById('background'),
+            submit: document.getElementById('submit_set'),
+            close: document.getElementById('close_set'),
+            updTimeInput: document.getElementById('upd_timer'),
+        },
     };
 
 
@@ -97,6 +107,7 @@ window.addEventListener('DOMContentLoaded', function() {
         cells: [],
         positionsField: [],
         colorsSet: new Set(),
+        mode: 'S',
         contacts: 0,
         sz: 0,
 
@@ -125,6 +136,7 @@ window.addEventListener('DOMContentLoaded', function() {
             this.cells[n].speed.y = +((Math.random() * 10) % 5 + 5).toFixed(0);
             if (Math.random() < 0.5) { this.cells[n].speed.x = -this.cells[n].speed.x; }
             if (Math.random() < 0.5) { this.cells[n].speed.y = -this.cells[n].speed.y; }
+            this.cells[n].power = Math.round(Math.random());
             this.cells[n].elem.style.left = this.cells[n].point.x + 'px';
             this.cells[n].elem.style.top = this.cells[n].point.y + 'px';
             this.cells[n].elem.style.backgroundColor = '#' + this.cells[n].teamColor.hex;
@@ -153,35 +165,31 @@ window.addEventListener('DOMContentLoaded', function() {
             this.cells[n].speed = Object.create(ProtoPoint);
             this.cells[n].speed.x = sx;
             this.cells[n].speed.y = sy;
+            this.cells[n].power = Math.round(Math.random());
             this.cells[n].elem.style.left = this.cells[n].point.x + 'px';
             this.cells[n].elem.style.top = this.cells[n].point.y + 'px';
             this.cells[n].elem.style.backgroundColor = '#' + this.cells[n].teamColor.hex;
+            this.update();
         },
 
-        checkContactsByOjbects: function(num) {
-            for (let i = 0; i < this.cells.length; ++i) {
-                if (num == i) { continue; }
-                if (this.cells[num].isInRadius(this.cells[i].point)) {   
-                    ++this.contacts;
-                    // console.log(num+" contact with "+i);
-                    // console.log("BIP");
-                }
-            }
-        },
-
-        checkContactsByField: function(num) {
+        checkContactsByField: function (num) {
             let r = this.cells[num].rangeRadius;
-            for (let x = -r; x <= r; ++x) {                
+            for (let x = -r; x <= r; ++x) {
                 for (let y = -r; y <= r; ++y) {
-                    if (x*x + y*y <= r*r) {
+                    if (x * x + y * y <= r * r) {
                         let fx = this.cells[num].cPoint.x + x,
                             fy = this.cells[num].cPoint.y + y;
                         if (fx < 0 || fx >= 800 || fy < 0 || fy >= 800) { continue; }
                         if (this.positionsField[fx][fy] != -1 && this.positionsField[fx][fy] != num) {
                             let contactIndex = this.positionsField[fx][fy];
-                            ++this.contacts;
-                            // console.log(num+" contact with "+contactIndex);
-                            // console.log("BIP");
+                            if (!this.cells[contactIndex].dead) {
+                                ++this.contacts;
+                                switch (this.mode) {
+                                    case 'TB': this.teamBattle(num, contactIndex); break;
+                                    case 'RB': this.rageBattle(num, contactIndex); break;
+                                    case 'CB': this.colorBattle(num, contactIndex); break;    
+                                }
+                            }
                         }
                     }
                 }
@@ -190,32 +198,122 @@ window.addEventListener('DOMContentLoaded', function() {
 
         moving: function () {
             for (let i = 0; i < this.cells.length; ++i) {
+                if (this.cells[i].dead) { continue; }
                 this.positionsField[this.cells[i].cPoint.x][this.cells[i].cPoint.y] = -1;
                 this.cells[i].move();
                 this.positionsField[this.cells[i].cPoint.x][this.cells[i].cPoint.y] = i;
                 this.checkContactsByField(i);
-                // this.checkContactsByOjbects(i);
             }
         },
 
         update: function () {
-            let container = document.getElementById('counts_container');
+            let Gcount = 0;
+            let container = document.getElementById('speed_container');
+            container.innerHTML = '';
+            let sum = 0;
+            for (let item of this.cells) {
+                if (item.dead) { continue; }
+                sum += Math.sqrt(item.speed.x * item.speed.x + item.speed.y * item.speed.y);
+                ++Gcount;
+            }
+            let avgSpeed = document.createElement('p');
+            avgSpeed.classList.add('info_text');
+            avgSpeed.innerText = (sum / Gcount).toFixed(6);
+            container.appendChild(avgSpeed);
+
+            container = document.getElementById('power_container');
+            container.innerHTML = '';
+            sum = 0;
+            for (let item of this.cells) {
+                if (item.dead) { continue; }
+                sum += item.power;
+            }
+            let avgPower = document.createElement('p');
+            avgPower.classList.add('info_text');
+            avgPower.innerText = (sum / Gcount).toFixed(6);
+            container.appendChild(avgPower);
+            
+            container = document.getElementById('counts_container');
             container.innerHTML = '';
             for (let color of this.colorsSet) {
                 let count = 0;
-                for (let item of this.cells) {  if (color === item.teamColor.hex) { ++count; } }
+                for (let item of this.cells) {
+                    if (item.dead) { continue; }
+                    if (color === item.teamColor.hex) { ++count; }
+                }
                 let countHTML = document.createElement('p');
-                countHTML.innerHTML = '<span style="color:#'+color+'">#'+color+'</span>: '+count;
-                countHTML.classList.add('count_info');
+                countHTML.innerHTML = '<span style="color:#' + color + '">#' + color + '</span>: ' + count;
+                countHTML.classList.add('info_text');
                 container.appendChild(countHTML);
             }
-        }
+            let countHTML = document.createElement('p');
+            countHTML.innerText = 'ALL: ' + Gcount;
+            countHTML.classList.add('info_text');
+            container.appendChild(countHTML);
+        },
+
+        teamBattle: function (a, b) {
+            if (this.cells[a].teamColor.hex != this.cells[b].teamColor.hex) {
+                if (this.cells[a].power > this.cells[b].power) {
+                    this.positionsField[this.cells[b].cPoint.x][this.cells[b].cPoint.y] = -1;
+                    this.cells[b].doDeath();
+                    this.cells[a].power++;
+                }
+                else if (this.cells[b].power > this.cells[a].power) {
+                    this.positionsField[this.cells[a].cPoint.x][this.cells[a].cPoint.y] = -1;
+                    this.cells[a].doDeath();
+                    this.cells[b].power++;
+                }
+            }
+        },
+
+        rageBattle: function (a, b) {
+            if (this.cells[a].power > this.cells[b].power) {
+                this.positionsField[this.cells[b].cPoint.x][this.cells[b].cPoint.y] = -1;
+                this.cells[b].doDeath();
+                this.cells[a].power++;
+            }
+            else if (this.cells[b].power > this.cells[a].power) {
+                this.positionsField[this.cells[a].cPoint.x][this.cells[a].cPoint.y] = -1;
+                this.cells[a].doDeath();
+                this.cells[b].power++;
+            }
+        },
+
+        colorBattle: function (a, b) {
+            if (this.cells[a].power > this.cells[b].power) {
+                let newColor = Object.create(ProtoColor);
+                newColor.r = Math.ceil((this.cells[a].teamColor.r*2 + this.cells[b].teamColor.r)/3);
+                newColor.g = Math.ceil((this.cells[a].teamColor.g*2 + this.cells[b].teamColor.g)/3);
+                newColor.b = Math.ceil((this.cells[a].teamColor.b*2 + this.cells[b].teamColor.b)/3);
+                this.cells[a].teamColor = newColor;
+                this.cells[a].teamColor.getNewHEX();
+                this.cells[a].recolor();
+                this.cells[b].teamColor = newColor;
+                this.cells[b].teamColor.getNewHEX();
+                this.cells[b].recolor();
+                this.cells[a].power++;
+            }
+            else if (this.cells[b].power > this.cells[a].power) {
+                let newColor = Object.create(ProtoColor);
+                newColor.r = Math.ceil((this.cells[b].teamColor.r*2 + this.cells[a].teamColor.r)/3);
+                newColor.g = Math.ceil((this.cells[b].teamColor.g*2 + this.cells[a].teamColor.g)/3);
+                newColor.b = Math.ceil((this.cells[b].teamColor.b*2 + this.cells[a].teamColor.b)/3);
+                this.cells[a].teamColor = newColor;
+                this.cells[a].teamColor.getNewHEX();
+                this.cells[a].recolor();
+                this.cells[b].teamColor = newColor;
+                this.cells[b].teamColor.getNewHEX();
+                this.cells[b].recolor();
+                this.cells[b].power++;
+            }
+        },
     };
 
-    let mainTimer, tact = 32;
-    for (let i = 0; i < 800; ++i) {
-        CellsObject.positionsField[i] = new Array(800);
-        for (let j = 0; j < 800; ++j) {
+    let mainTimer, tact = 32, updTimer, updTact = 0;
+    for (let i = 0; i < 810; ++i) {
+        CellsObject.positionsField[i] = new Array(810);
+        for (let j = 0; j < 810; ++j) {
             CellsObject.positionsField[i][j] = -1;
         }
     }
@@ -226,11 +324,13 @@ window.addEventListener('DOMContentLoaded', function() {
             e.target.classList.remove('green_btn');
             e.target.classList.add('red_btn');
             mainTimer = setInterval(() => { CellsObject.moving(); }, tact);
+            if (!isNaN(updTact) && updTact != 0) { updTimer = setInterval(() => { CellsObject.update(); }, updTact); }
         } else {
             e.target.textContent = 'Пуск';
             e.target.classList.remove('red_btn');
             e.target.classList.add('green_btn');
             clearInterval(mainTimer);
+            clearInterval(updTimer);
         }
     });
 
@@ -256,7 +356,31 @@ window.addEventListener('DOMContentLoaded', function() {
         CellsObject.update();
     });
 
-    btns.upd.addEventListener('click', () => {
-        CellsObject.update();
+    btns.settings.btn.addEventListener('click', () => {
+        btns.settings.context.classList.add('show');
+        btns.settings.bg.style.zIndex = 0;
+        btns.settings.bg.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    });
+    btns.settings.bg.addEventListener('click', () => {
+        btns.settings.context.classList.remove('show');
+        btns.settings.bg.style.zIndex = -1;
+        btns.settings.bg.style.backgroundColor = 'rgba(0,0,0,0)';
+    });
+    btns.settings.close.addEventListener('click', () => {
+        btns.settings.context.classList.remove('show');
+        btns.settings.bg.style.zIndex = -1;
+        btns.settings.bg.style.backgroundColor = 'rgba(0,0,0,0)';
+    });
+    btns.settings.submit.addEventListener('click', () => {
+        updTact = btns.settings.updTimeInput.value;
+        let radioBtns = document.getElementsByName('mode');
+        for (let item of radioBtns) {
+            if (item.checked) {
+                CellsObject.mode = item.value;
+            }
+        }
+        btns.settings.context.classList.remove('show');
+        btns.settings.bg.style.zIndex = -1;
+        btns.settings.bg.style.backgroundColor = 'rgba(0,0,0,0)';
     });
 });

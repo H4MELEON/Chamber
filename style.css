@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@500&family=Electrolize&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@500&family=Electrolize&family=PT+Mono&display=swap');
 
 html,
 body {
@@ -11,7 +11,7 @@ body {
 }
 
 h3 {
-    margin: 0;
+    margin: 10px;
 }
 
 #background {
@@ -116,14 +116,43 @@ button {
     left:5%;
 }
 
-input {
+.radio_container {
+    border-radius: 0;
+    display: block;
+    text-align: left;
+}
+
+.radio_btn {
+    margin: 5px;
+    vertical-align: middle;
+    width: 15px;
+    height: 15px;
+    padding: 5px;
+    -webkit-appearance: none;
+    background-color: red;
+    border: 2px dotted black;
+    transition: 0.5s;
+}
+
+.radio_btn:hover {
+    background-color: #AA0;
+}
+
+.radio_btn:checked {
+    border: solid;
+    background-color: green;
+}
+
+.text_input {
     display: block;
     border: 3px solid black;
     margin: 5px;
-    width: 100%;
+    width: calc(100% - 10px);
     font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'PT Mono';
     padding: 10px;
-    box-sizing:border-box;
+    box-sizing: border-box;
 }
 
 .info {
@@ -134,10 +163,10 @@ input {
     width: calc(90%-20px);
 }
 
-.count_info {
+.info_text {
     text-align: left;
     font-family: 'DM Mono';
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     margin: 2px;
 }
 
@@ -146,4 +175,8 @@ input {
     height: 10px;
     border-radius: 50%;
     position: absolute;
+}
+
+.dead_point {
+    display: none;
 }

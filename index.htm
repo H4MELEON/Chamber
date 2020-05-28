@@ -13,33 +13,50 @@
     <h1>Камера для экспериментов</h1>
     <div class="context_window hide">
         <h2>Добавить точки</h2>
-        <input id="count" type="text" placeholder="Количество">
-        <input id="color" type="text" placeholder="Цвет команды в HEX-формате (RRGGBB)">
-        <button id="submit" class="green_btn">Добавить</button>
-        <button id="close" class="red_btn">Закрыть</button>
+        <input id="count" type="text" class="text_input" placeholder="Количество">
+        <input id="color" type="text" class="text_input" placeholder="Цвет команды в HEX-формате (RRGGBB)">
+        <button id="submit_add" class="green_btn">Добавить</button>
+        <button id="close_add" class="red_btn">Закрыть</button>
+    </div>
+    <div class="context_window hide">
+        <h2>Настройки</h2>
+        <input id="upd_timer" type="text" class="text_input" placeholder="Время обновления в мс">
+        <div class="text_input radio_container">
+            <h3>Режим</h3>
+            <input name="mode" type="radio" value="S" checked class="radio_btn">Простой<br>
+            <input name="mode" type="radio" value="TB" class="radio_btn">Командный бой<br>
+            <input name="mode" type="radio" value="RB" class="radio_btn">Все против всех<br>
+            <input name="mode" type="radio" value="CB" class="radio_btn">Цветовой бой<br>
+        </div>
+        <button id="submit_set" class="green_btn">Сохранить</button>
+        <button id="close_set" class="red_btn">Закрыть</button>
     </div>
     <div class="add">
         <h2>Управление</h2>
         <button id="switch" class="green_btn">Пуск</button>
         <button id="add" class="yellow_btn">Добавить</button>
-        <button id="upd" class="yellow_btn">Обновить данные</button>
+        <button id="settings" class="yellow_btn">Настройки</button>
     </div>
 
     <div class="add">
         <h2>Информация</h2>
         <div class="info">
-            <h3>Количество клеток</h3>
+            <h3>Количество клеток (цвета изначальные)</h3>
             <div id="counts_container">
 
             </div>
         </div>
         <div class="info">
-            <h3></h3>
+            <h3>Средняя скорость</h3>
+            <div id="speed_container">
 
+            </div>
         </div>
         <div class="info">
-            <h3></h3>
+            <h3>Средняя сила</h3>
+            <div id="power_container">
 
+            </div>
         </div>
     </div>
 
